@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8443:8443"   # HTTPS API
+      - "2525:2525"   # SMTP ingest
+    volumes:
+      - ./certs:/app/certs:ro
+      - phishshield_data:/app/data
+    environment:
+      - AES_MASTER_KEY=${AES_MASTER_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@phishshield.local}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - DATABASE_URL=sqlite:////app/data/phishshield.db
+      - TLS_CERT_FILE=certs/server.crt
+      - TLS_KEY_FILE=certs/server.key
+      - TLS_CA_FILE=certs/ca.crt
+      - SMTP_HOST=0.0.0.0
+      - SMTP_PORT=2525
+      - API_HOST=0.0.0.0
+      - API_PORT=8443
+      - CORS_ORIGINS=https://localhost:3000,http://localhost:3000
+      - AUTH_DNS_MODE=${AUTH_DNS_MODE:-live}
+      - VT_API_KEY=${VT_API_KEY:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8443/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_BASE_URL: https://localhost:8443
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  phishshield_data:

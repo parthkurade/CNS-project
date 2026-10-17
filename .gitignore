@@ -1,0 +1,90 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+/lib/
+/lib64/
+!frontend/src/lib/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.venv/
+venv/
+ENV/
+env/
+.env
+*.env
+
+# ML artifacts > 50MB (use git-lfs if needed)
+backend/ml/model_*.pkl
+backend/ml/vectorizer_*.pkl
+backend/ml/data/
+
+# SQLite databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Certificates and private keys (NEVER commit)
+certs/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.der
+*.cer
+
+# Node
+node_modules/
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+frontend/dist/
+frontend/build/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Ruff
+.ruff_cache/
+
+# pyright / mypy
+.mypy_cache/
+pyrightconfig.json
