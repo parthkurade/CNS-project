@@ -1,0 +1,1 @@
+"""PhishShield SMTP package."""
