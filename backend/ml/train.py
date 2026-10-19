@@ -14,7 +14,6 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
-
 DEFAULT_DATA = Path("data/emails.csv")
 DEFAULT_MODEL = Path("backend/ml/email_model.joblib")
 

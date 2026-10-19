@@ -68,7 +68,7 @@ class DKIMError(Exception):
 @dataclass
 class DKIMSignatureResult:
     result: str
-    reason: str
+    reason: str = ""
     domain: str | None = None  # d=
     selector: str | None = None  # s=
     identity: str | None = None  # i=
@@ -103,6 +103,20 @@ class DKIMResult:
     def passing_domains(self) -> list[str]:
         """Signing domains (``d=``) of every signature that verified."""
         return [s.domain for s in self.signatures if s.passed and s.domain]
+
+    @property
+    def domain(self) -> str:
+        for s in self.signatures:
+            if s.domain:
+                return s.domain
+        return ""
+
+    @property
+    def selector(self) -> str:
+        for s in self.signatures:
+            if s.selector:
+                return s.selector
+        return ""
 
     def to_dict(self) -> dict[str, object]:
         return {"result": self.result, "signatures": [s.to_dict() for s in self.signatures]}

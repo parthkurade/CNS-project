@@ -78,7 +78,6 @@ class TestSimulationScenarios:
     async def test_all_scenarios_produce_email_records(self, db):
         """Ensure all 5 scenarios create real DB records."""
         from backend.app.models import EmailRecord
-
         from backend.simulation.scenarios import (
             scenario_mitm,
             scenario_phishing,

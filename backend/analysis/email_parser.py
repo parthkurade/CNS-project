@@ -107,12 +107,33 @@ class ParsedEmail:
     from_address: str = ""
     from_domain: str = ""
     from_addresses: list[str] = field(default_factory=list)
-    sender_address: str = ""  # "Sender:" header, if any
+    sender_address: str = ""  # "Sender:" header, if any, or defaults to from_address
+    sender_domain: str = ""
     return_path: str | None = None  # None = header absent, "" = null sender "<>"
     return_path_domain: str = ""
     reply_to: list[str] = field(default_factory=list)
     to: list[str] = field(default_factory=list)
     cc: list[str] = field(default_factory=list)
+
+    @property
+    def to_addresses(self) -> list[str]:
+        return self.to
+
+    @property
+    def sha256_hash(self) -> str:
+        return self.sha256
+
+    @property
+    def received_chain(self) -> list[str]:
+        return self.received
+
+    @property
+    def received_from_ip(self) -> str | None:
+        return self.received_ips[0] if self.received_ips else None
+
+    @property
+    def sender_display_name(self) -> str:
+        return self.from_display
 
     # --- transport trace ---
     received: list[str] = field(default_factory=list)  # top (most recent) first
@@ -393,7 +414,7 @@ def parse_email(raw: bytes | str) -> ParsedEmail:
         raw=normalized,
         raw_headers=raw_headers,
         raw_body=raw_body,
-        sha256=hashlib.sha256(normalized).hexdigest(),
+        sha256=hashlib.sha256(raw).hexdigest(),
     )
 
     # Decoded header list (RFC 2047 words decoded by the email package, raw as fallback).
@@ -435,6 +456,9 @@ def parse_email(raw: bytes | str) -> ParsedEmail:
     sender_pairs = _address_list(_safe_header(msg, "Sender"))
     if sender_pairs:
         parsed.sender_address = sender_pairs[0][1].lower()
+    else:
+        parsed.sender_address = parsed.from_address
+    parsed.sender_domain = extract_domain(parsed.sender_address)
 
     # Return-Path (envelope sender as recorded by the final MTA)
     rp = _safe_header(msg, "Return-Path")
