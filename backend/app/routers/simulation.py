@@ -4,13 +4,13 @@ POST /simulate/{scenario} – run an attack simulation against the real pipeline
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-
 from backend.app.database import get_db
 from backend.app.deps import get_current_user
 from backend.app.models import User
 from backend.app.schemas import SimulationRequest, SimulationResult
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
 from backend.simulation.scenarios import run_scenario
 
 router = APIRouter(prefix="/simulate", tags=["simulation"])

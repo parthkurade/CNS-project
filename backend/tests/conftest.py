@@ -45,10 +45,10 @@ def setup_test_db():
     """Create test tables once per session and seed admin."""
     from datetime import datetime
 
+    from backend.app.deps import hash_password
     from sqlalchemy.exc import IntegrityError
 
     from backend.app import models  # noqa: F401
-    from backend.app.deps import hash_password
     Base.metadata.create_all(bind=test_engine)
     session = TestingSessionLocal()
     try:
