@@ -1,0 +1,1 @@
+"""PhishShield crypto package."""
