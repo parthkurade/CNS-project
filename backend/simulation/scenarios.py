@@ -23,12 +23,11 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Any
 
-from sqlalchemy.orm import Session
-
 from backend.app.pipeline import process_email
 from backend.crypto.hashing import sha256_hash
 from backend.crypto.replay import current_timestamp, generate_nonce
 from backend.crypto.signatures import ed25519_sign, generate_ed25519_keypair
+from sqlalchemy.orm import Session
 
 # ─── Phishing email templates ─────────────────────────────────────────────────
 
