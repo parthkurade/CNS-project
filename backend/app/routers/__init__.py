@@ -1,3 +1,0 @@
-"""
-PhishShield – API Routers Package.
-"""
