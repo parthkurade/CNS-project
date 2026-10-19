@@ -174,8 +174,8 @@ class FakeResolver:
 class SPFResult:
     result: str  # pass / fail / softfail / neutral / none / temperror / permerror
     domain: str  # domain whose SPF policy was evaluated first (MAIL FROM or HELO domain)
-    sender: str  # identity that was checked
-    client_ip: str
+    sender: str = ""  # identity that was checked
+    client_ip: str = ""
     explanation: str = ""
     mechanism: str | None = None  # the mechanism that matched, e.g. "ip4:192.0.2.0/24"
     record: str | None = None  # the top-level SPF record text
@@ -502,26 +502,28 @@ class _Evaluator:
 # Public API
 # --------------------------------------------------------------------------------------
 def check_spf(
-    client_ip: str,
-    mail_from: str | None,
+    client_ip: str | None = None,
+    mail_from: str | None = None,
     helo: str = "",
     resolver: DNSResolver | None = None,
     *,
+    sending_ip: str | None = None,
+    sender_email: str | None = None,
     max_lookups: int = 10,
     max_void_lookups: int = 2,
 ) -> SPFResult:
-    """Evaluate SPF for a message received from *client_ip*.
+    """Evaluate SPF for a message received from *client_ip* or *sending_ip*.
 
     Args:
-        client_ip: IP address of the SMTP client that delivered the message (taken from the
-            socket, **not** from any header).
-        mail_from: the envelope sender (``MAIL FROM``). For bounces (empty / ``<>``) the
-            identity ``postmaster@<helo>`` is checked, as RFC 7208 section 2.4 requires.
+        client_ip: IP address of the SMTP client that delivered the message.
+        mail_from: the envelope sender (``MAIL FROM``).
         helo: the HELO/EHLO name given by the client.
         resolver: DNS backend; defaults to :class:`DnsPythonResolver`.
     """
-    ip_text = (client_ip or "").strip()
-    sender = (mail_from or "").strip().strip("<>").strip()
+    effective_ip = client_ip or sending_ip or ""
+    effective_mail_from = mail_from if mail_from is not None else (sender_email or "")
+    ip_text = (effective_ip or "").strip()
+    sender = (effective_mail_from or "").strip().strip("<>").strip()
     helo = (helo or "").strip().rstrip(".")
 
     try:

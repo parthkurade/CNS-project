@@ -203,6 +203,18 @@ class AttachmentAnalysis:
     def virustotal_detections(self) -> int:
         return self.vt_detection_count or 0
 
+    @property
+    def sha256_hash(self) -> str:
+        return self.sha256
+
+    @property
+    def content_type(self) -> str:
+        return self.mime_type
+
+    @property
+    def risks(self) -> list[str]:
+        return self.risk_factors
+
 
 # ---------------------------------------------------------------------------
 # Individual check functions

@@ -275,7 +275,10 @@ async def process_email(
 
     # Check for signed message headers (X-PhishShield-Signature: <base64_sig> key_id=<id>)
     # Use case-insensitive lookup since email headers preserve original case
-    _headers_lower = {k.lower(): v for k, v in (parsed.headers or {}).items()}
+    if isinstance(parsed.headers, dict):
+        _headers_lower = {k.lower(): v for k, v in parsed.headers.items()}
+    else:
+        _headers_lower = {k.lower(): v for k, v in (parsed.headers or [])}
     sig_header = _headers_lower.get("x-phishshield-signature", "")
     hmac_header = _headers_lower.get("x-phishshield-hmac", "")
     nonce_header = _headers_lower.get("x-phishshield-nonce", "")

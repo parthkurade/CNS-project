@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import csv
 import email
+import email.policy
 import io
 import tarfile
 from pathlib import Path
@@ -42,20 +43,29 @@ def extract_emails(archive_bytes: bytes, archive_name: str) -> list[str]:
                 continue
 
             raw = file_obj.read()
-            parsed = email.message_from_bytes(raw)
-            subject = parsed.get("Subject", "")
-            body = parsed.get_payload()
-
-            if isinstance(body, list):
-                body_text = " ".join(
-                    part.get_content() or ""
-                    for part in body
-                    if part.get_content_maintype() == "text"
-                )
-            elif isinstance(body, str):
-                body_text = body
-            else:
-                body_text = ""
+            try:
+                parsed = email.message_from_bytes(raw, policy=email.policy.default)
+                subject = str(parsed.get("Subject", "") or "")
+                body_parts: list[str] = []
+                for part in parsed.walk():
+                    if part.get_content_maintype() == "text":
+                        try:
+                            content = part.get_content()
+                            if content:
+                                body_parts.append(str(content))
+                        except Exception:
+                            pass
+                body_text = " ".join(body_parts)
+            except Exception:
+                parsed = email.message_from_bytes(raw)
+                subject = str(parsed.get("Subject", "") or "")
+                body = parsed.get_payload()
+                if isinstance(body, list):
+                    body_text = " ".join(str(p.get_payload() or "") for p in body)
+                elif isinstance(body, str):
+                    body_text = body
+                else:
+                    body_text = ""
 
             messages.append(f"Subject: {subject}\n\n{body_text}")
 

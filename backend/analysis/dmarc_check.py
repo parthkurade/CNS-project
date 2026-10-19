@@ -21,7 +21,7 @@ import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 
-from backend.analysis.dkim_check import DKIMResult, check_dkim
+from backend.analysis.dkim_check import DKIMResult, DKIMSignatureResult, check_dkim
 from backend.analysis.email_parser import ParsedEmail, parse_email
 from backend.analysis.spf_check import (
     DnsPythonResolver,
@@ -392,3 +392,28 @@ def authenticate_email(
     else:
         verdict = "unauthenticated"
     return AuthenticationSummary(spf, dkim, dmarc, compute_risk_factor(spf, dkim, dmarc), verdict)
+
+
+def check_dmarc(
+    from_header: str,
+    spf_result: str = "none",
+    spf_domain: str = "",
+    dkim_result: str = "none",
+    dkim_domain: str = "",
+    resolver: DNSResolver | None = None,
+) -> DMARCResult:
+    """Evaluate DMARC given from_header and SPF/DKIM result strings."""
+    domain = from_header.split("@")[-1].strip().rstrip(">") if "@" in from_header else from_header.strip()
+    spf_obj = (
+        SPFResult(result=spf_result.lower(), domain=spf_domain)
+        if spf_result
+        else None
+    )
+    dkim_sig = DKIMSignatureResult(result=dkim_result.lower(), reason="", domain=dkim_domain)
+    dkim_obj = (
+        DKIMResult(result=dkim_result.lower(), signatures=[dkim_sig])
+        if dkim_result
+        else None
+    )
+    return evaluate_dmarc(domain, spf_obj, dkim_obj, resolver)
+
